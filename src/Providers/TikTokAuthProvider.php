@@ -17,7 +17,7 @@ class TikTokAuthProvider extends AbstractProvider
     /**
      * Default host
      */
-    protected string $host = 'https://open-api.tiktok.com';
+    protected $host = 'https://open-api.tiktok.com';
 
     public function __construct(array $options = [], array $collaborators = [])
     {
@@ -33,6 +33,7 @@ class TikTokAuthProvider extends AbstractProvider
      */
     public function getBaseAuthorizationUrl(): string
     {
+        https://www.tiktok.com/auth/authorize?client_key=awb7k558dhzy7dby&response_type=code&scope=user.info.basic,video.list&state=qycc6roydnl&redirect_uri=https://4aac-2a0c-5a86-1204-9f00-1d2e-f530-f6fd-d366.eu.ngrok.io/tiktokcallback?state=qycc6roydnl&type=
         return 'https://open-api.tiktok.com/platform/oauth/connect/';
     }
 
