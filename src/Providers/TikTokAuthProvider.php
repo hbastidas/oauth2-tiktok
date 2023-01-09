@@ -116,6 +116,9 @@ class TikTokAuthProvider extends AbstractProvider
                         "display_name",
                         "profile_deep_link",
                         "bio_description",
+                        "follower_count",
+                        "following_count",
+                        "likes_count"
                     ],
                 ]
             ),
