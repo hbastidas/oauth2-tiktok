@@ -88,7 +88,7 @@ class TikTokAuthProvider extends AbstractProvider
     {
         // Documentation: https://developers.tiktok.com/doc/login-kit-user-info-basic
 
-        return 'https://open-api.tiktok.com/user/info/';
+        return 'https://open.tiktokapis.com/v2/user/info/';
     }
 
     /**
@@ -124,9 +124,9 @@ class TikTokAuthProvider extends AbstractProvider
             ),
         ];
 
-        $request = $this->createRequest(self::METHOD_POST, $url, null, $options);
-
-        return $this->getParsedResponse($request);
+        $request = $this->createRequest(self::METHOD_GET, $url, null, $options);
+        $data = $this->getParsedResponse($request);
+        return $data;
     }
 
     /**
@@ -170,6 +170,8 @@ class TikTokAuthProvider extends AbstractProvider
     {
         return [
             'user.info.basic',
+            'user.info.profile',
+            'user.info.stats',
             'video.list',
             'video.upload',
         ];
