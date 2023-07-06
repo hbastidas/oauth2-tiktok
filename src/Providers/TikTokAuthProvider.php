@@ -67,9 +67,9 @@ class TikTokAuthProvider extends AbstractProvider
 
     protected function prepareAccessTokenResponse(array $result): array
     {
-        $result['data']['resource_owner_id'] = $result['data']['open_id'];
+        $result['resource_owner_id'] = $result['open_id'];
 
-        return $result['data'];
+        return $result;
     }
 
     /**
@@ -144,10 +144,10 @@ class TikTokAuthProvider extends AbstractProvider
             );
         }
 
-        if (isset($data['data']['error_code']) && $data['data']['error_code']) {
+        if (isset($data['error_code']) && $data['error_code']) {
             throw new IdentityProviderException(
-                $data['data']['description'],
-                $data['data']['error_code'],
+                $data['description'],
+                $data['error_code'],
                 $data
             );
         }

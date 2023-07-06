@@ -17,11 +17,11 @@ class TikTokResourceOwner implements ResourceOwnerInterface
 
     public function toArray(): array
     {
-        return $this->response['data'];
+        return $this->response;
     }
 
     public function getId(): string
     {
-        return $this->response['data']['user']['open_id'];
+        return $this->response['open_id'];
     }
 }
