@@ -94,6 +94,11 @@ class TikTokAuthProvider extends AbstractProvider
             "avatar_url_200",
             "avatar_large_url",
             "display_name",
+            "profile_deep_link",
+            "bio_description",
+            "follower_count",
+            "following_count",
+            "likes_count"
         ];
 
         $scopes = explode(',', $token->getValues()['scope'] ?? '');
@@ -110,6 +115,8 @@ class TikTokAuthProvider extends AbstractProvider
             $fields[] = 'likes_count';
             $fields[] = 'video_count';
         }
+
+        $fields = array_unique($fields);
 
         $url = $this->getResourceOwnerDetailsUrl($token);
         $url .= '?fields='.implode(',', $fields);
