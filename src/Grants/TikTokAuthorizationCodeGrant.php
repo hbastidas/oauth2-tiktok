@@ -27,6 +27,7 @@ class TikTokAuthorizationCodeGrant extends AbstractGrant
             'client_key' => $defaults['client_id'],
             'client_secret' => $defaults['client_secret'],
             'code' => $options['code'],
+            'redirect_uri' => $defaults['redirect_uri'],
         ];
     }
 }
