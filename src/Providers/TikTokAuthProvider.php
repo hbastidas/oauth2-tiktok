@@ -33,7 +33,7 @@ class TikTokAuthProvider extends AbstractProvider
      */
     public function getBaseAuthorizationUrl(): string
     {
-        return 'https://open-api.tiktok.com/platform/oauth/connect/';
+        return 'https://www.tiktok.com/v2/auth/authorize/';
     }
 
     public function getBaseAccessTokenUrl(array $params): string
