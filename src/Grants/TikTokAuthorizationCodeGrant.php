@@ -23,7 +23,6 @@ class TikTokAuthorizationCodeGrant extends AbstractGrant
     public function prepareRequestParameters(array $defaults, array $options): array
     {
         return [
-            'grant_type' => $this->getName(),
             'client_key' => $defaults['client_id'],
             'client_secret' => $defaults['client_secret'],
             'code' => $options['code'],
