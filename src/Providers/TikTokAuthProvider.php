@@ -14,11 +14,6 @@ use TikTok\OAuth2\Client\Grants\TikTokRefreshTokenGrant;
 
 class TikTokAuthProvider extends AbstractProvider
 {
-    /**
-     * Default host
-     */
-    protected $host = 'https://open-api.tiktok.com';
-
     public function __construct(array $options = [], array $collaborators = [])
     {
         parent::__construct($options, $collaborators);
@@ -43,12 +38,7 @@ class TikTokAuthProvider extends AbstractProvider
 
     public function getAccessTokenUrl(array $params): string
     {
-        // if ($params['grant_type'] === 'refresh_token') {
-        //     // Refresh token requires calling a different URL
-        //     return 'https://open-api.tiktok.com/oauth/refresh_token/';
-        // }
-
-        return $this->getBaseAccessTokenUrl($params);
+        return 'https://open.tiktokapis.com/v2/oauth/token/';
     }
 
     /**
@@ -65,29 +55,26 @@ class TikTokAuthProvider extends AbstractProvider
         return $options;
     }
 
-    protected function prepareAccessTokenResponse(array $result): array
+    protected function getAccessTokenResourceOwnerId(): string
     {
-        $result['resource_owner_id'] = $result['open_id'];
-
-        return $result;
+        return 'open_id';
     }
 
     /**
-     * @param null|AccessToken $token
-     * @return string[]
+     * Used for retrieving user information
      */
     protected function getAuthorizationHeaders($token = null): array
     {
-        return ['Authorization' => 'Bearer ' . $token->getToken()];
+        return ['Authorization' => 'Bearer '.$token->getToken()];
     }
 
     /**
      * Get provider URl to fetch the user info.
+     *
+     * @link https://developers.tiktok.com/doc/login-kit-user-info-basic
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token): string
     {
-        // Documentation: https://developers.tiktok.com/doc/login-kit-user-info-basic
-
         return 'https://open.tiktokapis.com/v2/user/info/';
     }
 
@@ -95,38 +82,48 @@ class TikTokAuthProvider extends AbstractProvider
      * Requests and returns the resource owner of given access token.
      *
      * @throws IdentityProviderException
+     * @link https://developers.tiktok.com/doc/tiktok-api-v2-get-user-info/
      */
     public function fetchResourceOwnerDetails(AccessToken $token): array
     {
-        $url = $this->getResourceOwnerDetailsUrl($token);
-
-        $options = [
-            'headers' => $this->getDefaultHeaders(),
-            'body' => json_encode(
-                [
-                    'open_id' => $token->getResourceOwnerId(),
-                    'access_token' => $token->getToken(),
-                    'fields' => [
-                        "open_id",
-                        "union_id",
-                        "avatar_url",
-                        "avatar_url_100",
-                        "avatar_url_200",
-                        "avatar_large_url",
-                        "display_name",
-                        "profile_deep_link",
-                        "bio_description",
-                        "follower_count",
-                        "following_count",
-                        "likes_count"
-                    ],
-                ]
-            ),
+        $fields = [
+            "open_id",
+            "union_id",
+            "avatar_url",
+            "avatar_url_100",
+            "avatar_url_200",
+            "avatar_large_url",
+            "display_name",
         ];
 
-        $request = $this->createRequest(self::METHOD_GET, $url, null, $options);
-        $data = $this->getParsedResponse($request);
-        return $data;
+        $scopes = explode(',', $token->getValues()['scope'] ?? '');
+
+        if (in_array('user.info.profile', $scopes)) {
+            $fields[] = 'bio_description';
+            $fields[] = 'profile_deep_link';
+            $fields[] = 'is_verified';
+        }
+
+        if (in_array('user.info.stats', $scopes)) {
+            $fields[] = 'follower_count';
+            $fields[] = 'following_count';
+            $fields[] = 'likes_count';
+            $fields[] = 'video_count';
+        }
+
+        $url = $this->getResourceOwnerDetailsUrl($token);
+        $url .= '?fields='.implode(',', $fields);
+
+        $options = [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+        ];
+
+        $request = $this->createRequest(self::METHOD_GET, $url, $token, $options);
+
+        return $this->getParsedResponse($request);
     }
 
     /**
@@ -136,25 +133,18 @@ class TikTokAuthProvider extends AbstractProvider
      */
     public function checkResponse(ResponseInterface $response, $data): void
     {
-        if (isset($data['error']['code']) && $data['error']['code']) {
-            throw new IdentityProviderException(
-                $data['error']['message'],
-                $data['error']['code'],
-                $data
-            );
-        }
-
-        if (isset($data['error_code']) && $data['error_code']) {
-            throw new IdentityProviderException(
-                $data['description'],
-                $data['error_code'],
-                $data
-            );
-        }
-
-        if ($response->getStatusCode() === 401) {
+        if ($response->getStatusCode() >= 400) {
             throw new IdentityProviderException(
                 $response->getReasonPhrase(),
+                $response->getStatusCode(),
+                $data
+            );
+        }
+
+        if (isset($data['error']['code']) && $data['error']['code'] !== 'ok') {
+            // Errors from user info
+            throw new IdentityProviderException(
+                $data['error']['message'],
                 $response->getStatusCode(),
                 $data
             );
@@ -174,6 +164,7 @@ class TikTokAuthProvider extends AbstractProvider
             'user.info.stats',
             'video.list',
             'video.upload',
+            'video.publish',
         ];
     }
 }
