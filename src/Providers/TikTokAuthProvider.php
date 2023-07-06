@@ -38,17 +38,17 @@ class TikTokAuthProvider extends AbstractProvider
 
     public function getBaseAccessTokenUrl(array $params): string
     {
-        return 'https://open-api.tiktok.com/oauth/access_token/';
+        return 'https://open.tiktokapis.com/v2/oauth/token/';
     }
 
     public function getAccessTokenUrl(array $params): string
     {
-        if ($params['grant_type'] === 'refresh_token') {
-            // Refresh token requires calling a different URL
-            return 'https://open-api.tiktok.com/oauth/refresh_token/';
-        }
+        // if ($params['grant_type'] === 'refresh_token') {
+        //     // Refresh token requires calling a different URL
+        //     return 'https://open-api.tiktok.com/oauth/refresh_token/';
+        // }
 
-        return 'https://open-api.tiktok.com/oauth/access_token/';
+        return $this->getBaseAccessTokenUrl($params);
     }
 
     /**
