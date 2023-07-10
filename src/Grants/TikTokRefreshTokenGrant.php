@@ -25,6 +25,7 @@ class TikTokRefreshTokenGrant extends AbstractGrant
         return [
             'grant_type' => $this->getName(),
             'client_key' => $defaults['client_id'],
+            'client_secret' => $defaults['client_secret'],
             'refresh_token' => $options['refresh_token'],
         ];
     }
